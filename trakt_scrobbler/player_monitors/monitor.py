@@ -295,6 +295,11 @@ class Monitor(Thread):
             logger.debug(f"action={action}")
             if action == "scrobble":
                 logger.debug(current)
+                # Fix for syncplay, see #202
+                if current['progress'] == 100 and current['state'] == State.Paused:
+                    logger.debug("Setting state to stopped. If you face duplicate scrobbles, raise a bug")
+                    logger.debug(current)
+                    current['state'] = State.Stopped
                 self.scrobble_status(current)
             elif action == "stop_previous":
                 self.scrobble_queue.put(("stop", prev))

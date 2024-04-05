@@ -11,6 +11,8 @@ from itertools import product
 from pathlib import Path
 
 import appdirs
+from trakt_scrobbler import logger
+from trakt_scrobbler.player_monitors.monitor import State
 from trakt_scrobbler.player_monitors.mpv import MPVMon, MPVPosixMon, MPVWinMon
 from trakt_scrobbler.utils import AutoloadError
 
@@ -84,6 +86,16 @@ class SyncplayMPVMon(MPVMon):
         return {
             "ipc_path": read_ipc
         }
+
+    def parse_status(self, status):
+        state = super().parse_status(status)
+        # Fix for #202: in playlists, syncplay pauses the file at 100% and jumps back to 0%
+        # we never get a "stop" event from syncplay, so it doesn't get marked as seen
+        if state and state['state'] == State.Paused and state['progress'] == 100:
+            logger.info("Setting state to stopped instead of paused at 100%." +
+                        "If you face duplicate scrobbles, raise a bug")
+            state['state'] = State.Stopped
+        return state
 
 
 class SyncplayMPVPosixMon(MPVPosixMon, SyncplayMPVMon):

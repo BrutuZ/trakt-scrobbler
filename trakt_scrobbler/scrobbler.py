@@ -56,8 +56,12 @@ class Scrobbler(Thread):
             name = resp['movie']['title']
             url = f"https://trakt.tv/movies/{resp['movie']['ids']['slug']}"
         else:
-            name = (resp['show']['title'] +
-                    " S{season:02}E{number:02}".format(**resp['episode']))
+            try:
+                name = (resp['show']['title'] +
+                        " S{season:02}E{number:02}".format(**resp['episode']))
+            except KeyError:
+                logger.exception(f"Weird response {resp}")
+                name = "Unknown show"
             url = f"https://trakt.tv/episodes/{resp['episode']['ids']['trakt']}"
 
         category = self._determine_category(verb, data['media_info'], resp['action'])

@@ -22,7 +22,9 @@ general:
   allowed_scrobbles:
     episode: all  # all, stop-only, none
     movie: all  # all, stop-only, none
-
+  trakt_api:  # User-customizable Trakt API Client credentials
+    id: ""
+    secret: ""
 
 fileinfo:
 
